@@ -35,4 +35,30 @@ class DNSServer(UDPDevice):
             2.1 如果domain name在self.url_ip中，构建对应的应答数据包，发送给客户端
             2.2 如果domain name不再self.url_ip中，将DNS请求发送给public DNS server
         """
-        pass
+        packet = DNSPacket(data)
+        print(packet.name)
+        if packet.QR == 0 and packet.OPCODE == 0:
+            with open("ipconf.txt", "r", encoding="utf-8") as f:
+                if packet.name in self.url_ip:
+                    ip = self.url_ip[packet.name]
+                    if ip == "0.0.0.0":
+                        res = packet.generate_response(ip, True)
+                        # self.send(res)
+                    else:
+                        res = packet.generate_response(ip, False)
+                        # self.send(res)
+                else:
+                    res = DNSPacket.generate_request(packet.name)
+                    self.server_socket.sendto(res, self.name_server)
+                    data = self.server_socket.recv(1024)
+                    ip_tup = []
+                    ip_tup.append(str(data[-4]))
+                    ip_tup.append(str(data[-3]))
+                    ip_tup.append(str(data[-2]))
+                    ip_tup.append(str(data[-1]))
+                    ip = ".".join(ip_tup)
+                    # ip = "0.0.0.0"
+                    res = packet.generate_response(ip, False)
+                    # self.send(res)
+        self.send(res)
+
