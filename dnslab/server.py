@@ -40,7 +40,6 @@ class DNSServer(UDPDevice):
             if packet.name in self.url_ip:
                 ip = self.url_ip[packet.name]
                 intercepted = ip == "0.0.0.0"
-                res = packet.generate_response(ip,intercepted)
                 res = packet.generate_response(ip, intercepted)
             else:
                 res = DNSPacket.generate_request(packet.name)
